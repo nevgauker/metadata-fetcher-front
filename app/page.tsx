@@ -102,7 +102,7 @@ export default function Home() {
         </div>
         {results.length > 0 && <h2 className="text-xl underline py-4">Results</h2>}
         <div className="grid grid-cols-1 md:grid-cols-3 space-x-1 space-y-1">
-          {results.map((result) => <ResultCard url={result.url} description={result.description} image={result.image} error={result.error} />)}
+          {results.map((result) => <ResultCard key={result.url} url={result.url} description={result.description} image={result.image} error={result.error} />)}
         </div>
       </>
       }
