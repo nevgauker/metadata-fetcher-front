@@ -4,7 +4,9 @@ import FetchRow from "@/components/fetch-row";
 import { Button } from "@/components/ui/button"
 
 import { useState } from "react";
-import { fetchMetadata } from "@/actions/fetch-metadata";
+import { fetchMetadata, Metadata } from "@/actions/fetch-metadata";
+
+import ResultCard from "@/components/result-card";
 
 export default function Home() {
 
@@ -13,6 +15,8 @@ export default function Home() {
     { selectValue: "https://", inputValue: "" },
     { selectValue: "https://", inputValue: "" },
   ]);
+  const [error, setError] = useState(false)
+  const [results, setRsults] = useState<Metadata[]>([])
 
   const addRow = () => {
     setRows((prevRows) => [
@@ -49,18 +53,20 @@ export default function Home() {
 
 
   const handleFetchMetadata = async () => {
+    setError(false)
+
     const urls = rows.map((row) => row.selectValue + row.inputValue);
 
     // Validate input length and URL format
     for (const url of urls) {
       const inputValue = url.replace(/https?:\/\//, ""); // Remove the protocol for length check
       if (inputValue.length <= 2) {
-        alert(`The input value '${inputValue}' is too short. It must be longer than 2 characters.`);
+        setError(true)
         return;
       }
 
       if (!validateUrl(url)) {
-        alert(`The URL '${url}' is not valid.`);
+        setError(true)
         return;
       }
     }
@@ -68,6 +74,7 @@ export default function Home() {
     try {
       const metadata = await fetchMetadata(urls);
       console.log("Fetched metadata:", metadata);
+      setRsults(metadata)
       // Handle the fetched metadata (e.g., display it to the user)
     } catch (error) {
       alert("Failed to fetch metadata. Please try again later.");
@@ -76,13 +83,22 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="flex flex-col space-y-4">
+      <h1 className="text-3xl">Fetch Metadata From Urls</h1>
+
+      <h2 className="text-xl underline py-4">Urls</h2>
+      <div className="flex flex-col space-y-4 border-b-2">
         {renderRows()}
+        {error && <p className="text-red-700 text-sm">Pleas write valid urls</p>}
         <Button className="text-lg" variant="outline" onClick={addRow}>+</Button>
       </div>
       <div className="flex justify-center items-center">
-        <Button variant="outline" onClick={handleFetchMetadata}>Fetch Metadata</Button>
+        <Button className="py-4" variant="outline" onClick={handleFetchMetadata}>Fetch Metadata</Button>
       </div>
+      {results.length > 0 && <h2 className="text-xl underline py-4">Results</h2>}
+      <div className="grid grid-cols-1 md:grid-cols-3 space-x-1 space-y-1">
+        {results.map((result) => <ResultCard url={result.url} description={result.description} image={result.image} error={result.error} />)}
+      </div>
+
     </main>
   );
 }

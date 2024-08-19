@@ -1,7 +1,7 @@
 "use server"
 import axios from 'axios';
 
-interface Metadata {
+export interface Metadata {
     url: string;
     title?: string;
     description?: string;
@@ -11,9 +11,6 @@ interface Metadata {
 
 
 export async function fetchMetadata(urls: string[]): Promise<Metadata[]> {
-
-
-
     console.log(urls)
     try {
         const response = await axios.post<Metadata[]>('https://fetch-metadata.vercel.app/fetch-metadata', {
